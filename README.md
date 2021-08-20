@@ -1,4 +1,4 @@
-#[Ünisearch](https://unisearch.cc/)
+# [Ünisearch](https://unisearch.cc/)
 
 [![codecov](https://codecov.io/gh/theblackcat102/unisearch/branch/master/graph/badge.svg?token=0LJ0W6VNSJ)](https://codecov.io/gh/theblackcat102/unisearch)
 
