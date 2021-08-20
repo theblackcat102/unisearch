@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block header %}
+<link href="/static/css/landing.css" rel="stylesheet">
+<meta name="author" content="Ünisearch">
+<meta property="og:image" content="/static/img/cover.jpg"/>
+<meta property="og:description" content="Ünisearch is the next generation search engine which allows you to search using any languages to find results across different languages"/>
+
+<title>{{ 'Ünisearch' }}</title>
+{% endblock %} 
+{% block content %}
+<div class="search-container">
+    <div class="logo">
+        <img alt="Ünisearch Logo" src="/static/img/unicorn.svg" class="unisearch-logo">
+    </div>
+  
+    <form class="search-form search-form-submit" method="post">
+        <div class="bar">
+            <input class="searchbar search-bar-action" type="text" title="Search" name="query" placeholder="Search web directly or click below for image search">
+            <!-- <a href="#"> <img class="voice" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Google_mic.svg/716px-Google_mic.svg.png" title="Search by Voice"></a> -->
+        </div>
+    </form>
+    <div class="buttons">
+        <form class="search-image" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/png, image/jpeg" id="image-input" style="display:none" onchange="submitImage()"/>
+            <button class="button" type="button" onclick="uploadAndSubmit();">Image Search</button>
+        </form>
+        <form class="search-image-form" method="post">
+            <input type="text" name="image_query"  style="display:none" id="image-text-input"/>
+            <button class="button" type="button" onclick="textImageSubmit();">Text Image Search</button>
+        </form>
+    </div>        
+</div>
+
+<script  src="/static/js/search.js"></script>
+
+{% endblock %} 

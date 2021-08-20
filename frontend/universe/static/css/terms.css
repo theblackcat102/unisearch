@@ -1,0 +1,14 @@
+.policy li {
+    float: left !important;
+    display: list-item !important;
+    display: block;
+}
+
+.policy {
+    list-style: none;
+}
+.policy ul {
+    /* list-style-type: block !important; */
+    list-style-type: disc !important; 
+    list-style-position: inside !important; 
+}

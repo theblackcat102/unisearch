@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block header %}
+<link href="/static/css/text_results.css" rel="stylesheet">
+<link href="/static/css/landing.css" rel="stylesheet">
+
+<title>{{ text }} - Ünisearch</title>
+{% endblock %} 
+{% block content %}
+
+<div class="headerSearch">
+    <!--Topleft Logo-->
+    <div class="logo">
+        <a href="/"><img src="/static/img/unicorn.svg" class="unisearch-side-logo" ></a>
+    </div>
+    <!--Searchbar-->
+    <form class="searchForm search-form-submit" method="post">
+        <input class="searchBar search-bar-action" name="query" type="text" value="{{ text }}" >
+        </datalist>
+    </form>
+</div>
+    <!--Navigation tabs-->
+    <div class="headerNav">             
+        <ul>
+            <li><a href="{{ img_url }}">Image</a></li>
+        </ul>
+    </div>
+    
+    <div class="searchResults">
+        <ul>
+            {% for result in results %}
+                <div class="searchResultsItem">
+                    <li><a href="{{  result['url'] | safe }}">{{  result['title'] |safe }}</a></li>
+                    <p class="resultAddr">{{ result['url_text'][:80] |safe }}</p>
+                    <p>{{  result['description'][:120] |safe }}</p>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+
+<script  src="/static/js/search.js"></script>
+
+{% endblock %} 
