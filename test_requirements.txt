@@ -1,0 +1,20 @@
+aiopg==0.15.0
+aiohttp==3.7.4.post0
+clip @ git+https://github.com/openai/CLIP.git@cfcffb90e69f37bf2ff1e988237a0fbe41f33c04
+coverage==5.5
+numpy==1.21.2
+peewee==3.14.4
+peewee-async==0.7.1
+python-dotenv==0.19.0
+sanic==21.6.2
+tokenizers==0.10.3
+torch==1.7.1
+torchvision==0.8.2
+tqdm==4.62.1
+transformers==4.6.1
+typing-extensions==3.10.0.0
+ujson==4.1.0
+uvloop==0.16.0
+sanic-jinja2==0.10.0
+sanic-session==0.8.0
+sanic-testing
