@@ -6,8 +6,7 @@ from peewee import *
 import peewee_asyncext
 from playhouse.postgres_ext import *
 from universe.settings import POSTGRESQL_SETTINGS, MILVUS_IMG_SETTINGS, MILVUS_TEXT_SETTINGS
-from datetime import datetime
-from milvus import Milvus, IndexType, MetricType, Status
+from milvus import Milvus
 
 
 postgres_database = peewee_asyncext.PooledPostgresqlExtDatabase(
@@ -24,7 +23,10 @@ class BaseModel(Model):
         database = postgres_database
 
 
-img_milvus = Milvus(host=MILVUS_IMG_SETTINGS['HOST'], port=str(MILVUS_IMG_SETTINGS['PORT']))
+img_milvus = Milvus(
+    host=MILVUS_IMG_SETTINGS['HOST'], 
+    port=str(MILVUS_IMG_SETTINGS['PORT'])
+)
 
 class Link(BaseModel):
 
@@ -36,7 +38,10 @@ class Link(BaseModel):
     domain = CharField(max_length=80)
     milvus_id = BigAutoField(primary_key=True)
 
-link_milvus = Milvus(host=MILVUS_TEXT_SETTINGS['HOST'], port=str(MILVUS_TEXT_SETTINGS['PORT']))
+link_milvus = Milvus(
+    host=MILVUS_TEXT_SETTINGS['HOST'], 
+    port=str(MILVUS_TEXT_SETTINGS['PORT'])
+)
 
 class Image(BaseModel):
     collection_name = MILVUS_TEXT_SETTINGS['DATABASE']

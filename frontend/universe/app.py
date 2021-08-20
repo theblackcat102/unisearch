@@ -11,7 +11,7 @@ import json
 from universe.settings import (
     IMG_ML_DOMAIN,
     ML_DOMAIN, SEARCH_TEXT, TARGET_VECTOR_SIZE,
-    SEARCH_IMG_BY_TEXT, SEARCH_IMG_BY_IMG, 
+    SEARCH_IMG_BY_TEXT, 
     SEARCH_ENCODED_IMG,
     IMAGE_CDN, ENCODED_IMG
 )
