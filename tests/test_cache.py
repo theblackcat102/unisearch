@@ -67,8 +67,9 @@ class VectorCache(unittest.TestCase):
 
 
         start = time()
-        self.assertTrue(isinstance(functs.text2text_retrieve_encodings('Hello World'), list))
-        t2 = time() - start
+        for _ in range(10):
+            self.assertTrue(isinstance(functs.text2text_retrieve_encodings('Hello World'), list))
+        t2 = ( time() - start)/10
         self.assertTrue(t1 > t2)
 
     def test_img2text_retrieve_encoding_by_img(self):
@@ -79,8 +80,9 @@ class VectorCache(unittest.TestCase):
 
 
         start = time()
-        self.assertTrue(isinstance(functs.img2text_retrieve_encoding_by_img(np.zeros((1, 3, 32, 32))), list))
-        t2 = time() - start
+        for _ in range(10):
+            self.assertTrue(isinstance(functs.img2text_retrieve_encoding_by_img(np.zeros((1, 3, 32, 32))), list))
+        t2 = (time() - start)/10
         self.assertTrue(t1 > t2)
 
 
