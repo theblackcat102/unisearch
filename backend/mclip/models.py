@@ -19,23 +19,6 @@ class LayerNorm(nn.LayerNorm):
         ret = super().forward(x.type(torch.float32))
         return ret.type(orig_type)
 
-def freeze_transformer_layers(model, target_layer_num):
-    '''
-        Freeze transformers before [layer_num]-th layer
-    '''
-    for name, params in model.named_parameters():
-        if 'embeddings' in name:
-            params.requires_grad = False
-        elif '.layer.' in name:
-            layer_num = int(name.split('.layer.', 1)[1].split('.', 1)[0])
-            if layer_num < target_layer_num:
-                params.requires_grad = False
-            #     print('freeze', name)
-            # else:
-            #     print('not freeze' ,name)
-    return model
-
-
 
 def build_model(state_dict: dict):
     vit = "visual.proj" in state_dict
@@ -66,84 +49,7 @@ def build_model(state_dict: dict):
         embed_dim, context_length, vocab_size, transformer_width, transformer_heads, transformer_layers
 
 
-class CLIPTransformer(nn.Module):
 
-    def __init__(self, 
-            embed_dim: int,
-            context_length: int,
-            vocab_size: int,
-            transformer_width: int,
-            transformer_heads: int,
-            transformer_layers: int,
-            down_embed_dim: int):
-        super().__init__()
-
-        from clip.model import Transformer
-        self.context_length = context_length
-
-        self.transformer = Transformer(
-            width=transformer_width,
-            layers=transformer_layers,
-            heads=transformer_heads,
-            attn_mask=self.build_attention_mask()
-        )
-        self.vocab_size = vocab_size
-        self.token_embedding = nn.Embedding(vocab_size, transformer_width)
-        self.positional_embedding = nn.Parameter(torch.empty(self.context_length, transformer_width))
-        self.ln_final = LayerNorm(transformer_width)
-
-        self.text_projection = nn.Parameter(torch.empty(transformer_width, embed_dim))
-        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
-
-        self.text_projection_stage2 = nn.Linear(embed_dim, down_embed_dim, bias=False)
-
-    def load_pretrain_state(self, pretrained_state_dict):
-        state_dict = self.state_dict()
-        for key, tensor in pretrained_state_dict.items():
-            if key in state_dict:
-                state_dict[key] = tensor
-        self.load_state_dict(state_dict)
-
-    @property
-    def dtype(self):
-        return self.text_projection_stage2.weight.dtype
-
-    def initialize_parameters(self):
-        nn.init.normal_(self.token_embedding.weight, std=0.02)
-        nn.init.normal_(self.positional_embedding, std=0.01)
-
-        proj_std = (self.transformer.width ** -0.5) * ((2 * self.transformer.layers) ** -0.5)
-        attn_std = self.transformer.width ** -0.5
-        fc_std = (2 * self.transformer.width) ** -0.5
-        for block in self.transformer.resblocks:
-            nn.init.normal_(block.attn.in_proj_weight, std=attn_std)
-            nn.init.normal_(block.attn.out_proj.weight, std=proj_std)
-            nn.init.normal_(block.mlp.c_fc.weight, std=fc_std)
-            nn.init.normal_(block.mlp.c_proj.weight, std=proj_std)
-
-        if self.text_projection is not None:
-            nn.init.normal_(self.text_projection, std=self.transformer.width ** -0.5)
-
-    def build_attention_mask(self):
-        # lazily create causal attention mask, with full attention between the vision tokens
-        # pytorch uses additive attention mask; fill with -inf
-        mask = torch.empty(self.context_length, self.context_length)
-        mask.fill_(float("-inf"))
-        mask.triu_(1)  # zero out the lower diagonal
-        return mask
-    
-    def forward(self, text):
-        x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]
-
-        x = x + self.positional_embedding.type(self.dtype)
-        x = x.permute(1, 0, 2)  # NLD -> LND
-        x = self.transformer(x)
-        x = x.permute(1, 0, 2)  # LND -> NLD
-        x = self.ln_final(x).type(self.dtype)
-        # x.shape = [batch_size, n_ctx, transformer.width]
-        # take features from the eot embedding (eot_token is the highest number in each sequence)
-        x = x[torch.arange(x.shape[0]), text.argmax(dim=-1)] @ self.text_projection
-        return self.text_projection_stage2(x)
 
 
 class MCLIP(nn.Module):
@@ -193,6 +99,7 @@ class MCLIP(nn.Module):
                 self.img_projection = nn.Linear(embed_dim, text_embed_dim, bias=False)
 
         if isinstance(text_pretrain, str):
+            from transformers import AutoModel
             self.transformer = AutoModel.from_pretrained(text_pretrain)
         else:
             self.transformer = text_pretrain
@@ -307,8 +214,9 @@ def build_multilingual_model(clip_name='RN50', tokenizer='distilbert-base-multil
     # load tokenizer and language model from huggingface ( the base of mutilingual encoder )
     text_model = AutoModel.from_pretrained(tokenizer)
     tokenizer = AutoTokenizer.from_pretrained(tokenizer)
-
+    print(vision_layers, vision_width, image_resolution, vision_patch_size)
     # image-text encoder for multilingual
+
     new_clip = MCLIP(
         embed_dim=1024, # RN50: 1024, ViT: 512
         image_resolution=image_resolution,
